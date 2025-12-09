@@ -10,6 +10,7 @@ in output mode or input mode"""
         self.output = output
         self.pwm = PWM(pin, freq)
         self.off()
+        self.value = 0
         sleep_ms(10) # allow PWM hardware to stabilize
 
     def deinit(self):
@@ -24,7 +25,8 @@ in output mode or input mode"""
                 value = int((levels-1) * value**2)
             else:
                 value = int((levels-1) * sqrt(1 - value))
-                
+            
+            self.value = value
             self.pwm.duty(value)
         else:
             raise ValueError(f"brightness value must be within [0, 1], not {value}")
@@ -36,12 +38,17 @@ in output mode or input mode"""
     def off(self):
         """Turn Led completely off"""
         self.brightness(0)
-
+        
+    def get_brightness(self):
+        return self.value
 
 class RGBLed:
     def __init__(self, r, g, b, freq=1000):
         """Use Led class to initialize red, green, and blue portions of the RGB Led"""
         self.leds = [Led(r, False), Led(g, False), Led(b, False)]
+        self.red = 0
+        self.green = 0
+        self.blue = 0
 
     def deinit(self):
         """Safely deinitialize pins at the end of use"""
@@ -54,10 +61,16 @@ class RGBLed:
             led.off()
 
     def set_color(self, red, green, blue):
-        """Set rgb values between [0,1]"""
+        self.red = red
+        self.green = green
+        self.blue = blue
+        
         self.leds[0].brightness(red)
         self.leds[1].brightness(green)
         self.leds[2].brightness(blue)
+        
+    def get_color(self):
+        return (self.red, self.green, self.blue)
 
 class LedBar:
     def __init__(self, pins):
@@ -81,3 +94,5 @@ class LedBar:
     def led_off(self, index):
         """Turn individual led from [0, 9] off"""
         self.leds[index].value(0)
+            
+# pins that work [23, 22, 32, 33, 25, 26, 27, 14, 12, 13]

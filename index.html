@@ -12,66 +12,44 @@
                 // create the websocket
                 ws = new WebSocket(`ws://${ip}/area`)
                 // connect up 4 std functions
-                ws.onopen = () => {
-                    console.log("WebSocket connected");
-
-                    const redSlider = document.getElementById("redSlider");
-                    const greenSlider = document.getElementById("greenSlider");
-                    const blueSlider = document.getElementById("blueSlider");
-
-                    const redLabel = document.getElementById("redLabel");
-                    const greenLabel = document.getElementById("greenLabel");
-                    const blueLabel = document.getElementById("blueLabel");
-
-                    let updatingFromESP = false;
-
-                    function send() {
-                        if (updatingFromESP) return;
-
+                function send(room, rgbRoom) {
+                    console.log("Room: ", room);
+                    if (rgbRoom) {
                         const data = {
-                            
-                            red: parseInt(redSlider.value),
-                            green: parseInt(greenSlider.value),
-                            blue: parseInt(blueSlider.value)
+                            area: room,
+                            rgb: {
+                                red: rgbRoom.red,
+                                green: rgbRoom.green,
+                                blue: rgbRoom.blue
+                            }
                         };
-
                         ws.send(JSON.stringify(data));
-
-                        redLabel.innerText = redSlider.value + '%';
-                        greenLabel.innerText = greenSlider.value + '%';
-                        blueLabel.innerText = blueSlider.value + '%';
                     }
+                    else {
+                        const data = {
+                            area: room
+                        };
+                        ws.send(JSON.stringify(data));
+                    }
+                }
+                ws.onopen = () => {
+                   const redRoom = document.getElementById("redRoom");
+                   redRoom.onclick = () => send("redRoom");
 
-
-                    redSlider.oninput = send;
-                    greenSlider.oninput = send;
-                    blueSlider.oninput = send;
+                   const blueRoom = document.getElementById("blueRoom");
+                   blueRoom.onclick = () => send("blueRoom", "");
+                   
+                   const rgbRoom = document.getElementById("rgbRoom");
+                   rgbRoom.onclick = () => {
+                        send("rgbRoom");
+                        picker = document.getElementById("colorPicker");
+                        picker.innerHTML = "<input type = 'color' id= 'colorPicker'>";
+                   };
                 }
 
                 // receiving data from esp32: update slider bar and percentage
                 ws.onmessage = (event) => {
-                    try {
-                        const led = JSON.parse(event.data);
-
-                        const redSlider = document.getElementById("redSlider");
-                        const greenSlider = document.getElementById("greenSlider");
-                        const blueSlider = document.getElementById("blueSlider");
-
-                        const redLabel = document.getElementById("redLabel");
-                        const greenLabel = document.getElementById("greenLabel");
-                        const blueLabel = document.getElementById("blueLabel");
-
-                        redSlider.value = led.red;
-                        greenSlider.value = led.green;
-                        blueSlider.value = led.blue;
-
-                        redLabel.innerText = led.red + "%";
-                        greenLabel.innerText = led.green + "%";
-                        blueLabel.innerText = led.blue + "%";
-                    }
-                    catch (error){
-                        console.error("bad data from ESP32", event.data);
-                    }
+                    console.log("message");
                 };
 
 
@@ -89,12 +67,13 @@
         <nav>
             <li><a href="index.html">Home</a></li>
         </nav>
-        <img src="home.png" alt="Workplace" usemap="#workmap" width="1024" height="1024">
+        <img src="https://raw.githubusercontent.com/abelje/final-project/refs/heads/main/home.png" alt="Workplace" usemap="#workmap" width="1024" height="1024">
         <map name="workmap">
-            <area id="redRoom" shape="rect" coords="136,76,435,342" alt="redRoom" href="red.html">
-            <area id="blueRoom" shape="rect" coords="608,76,875,397" alt="blueRoom" href="blue.html">
-            <area id="rgbRoom" shape="rect" coords="136,592,875,933" alt="rgbRoom" href="rgb.html">
-        </map> 
+            <area id="redRoom" shape="rect" coords="136,76,435,342">
+            <area id="blueRoom" shape="rect" coords="608,76,875,397">
+            <area id="rgbRoom" shape="rect" coords="136,592,875,933">
+        </map>
+        <div id="colorPicker">
         
     </body>
 </html>
