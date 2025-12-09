@@ -38,7 +38,7 @@
                    redRoom.onclick = () => send("redRoom");
 
                    const blueRoom = document.getElementById("blueRoom");
-                   blueRoom.onclick = () => send("blueRoom", "");
+                   blueRoom.onclick = () => send("blueRoom");
                    
                    const rgbRoom = document.getElementById("rgbRoom");
                    rgbRoom.onclick = () => {
@@ -72,7 +72,9 @@
 
                 // receiving data from esp32: update slider bar and percentage
                 ws.onmessage = (event) => {
-                    console.log("message");
+                    brightness = document.getElementById("brightness");
+                    brightness.textContent = `Brightness: ${event.data}`
+                    console.log(event.data);
                 };
 
 
@@ -87,9 +89,7 @@
     </head>
     <body>
         <h1>Home</h1>
-        <nav>
-            <li><a href="index.html">Home</a></li>
-        </nav>
+        <h2 id="brightness">Brightness: #</h2>
         <img src="https://raw.githubusercontent.com/abelje/final-project/refs/heads/main/home.png" alt="Workplace" usemap="#workmap" width="1024" height="1024">
         <map name="workmap">
             <area id="redRoom" shape="rect" coords="136,76,435,342">

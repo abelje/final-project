@@ -1,10 +1,12 @@
 from led import Led, RGBLed
 from microdot import Microdot
 from wifi import Wifi
-from machine import Pin, ADC
+from machine import Pin, ADC, reset
 from time import sleep_ms
+from photoresistor import Photoresistor
 import json
 from websocket import with_websocket
+import asyncio
 
 wifi = Wifi("WarriorNET", "VictorEWarrior2023")
 wifi.connect('172.16.37.27')
@@ -26,17 +28,32 @@ async def index(request):
     ipaddr = wifi.get_ip_addr()
     with open('index.html', 'r') as f:
         text = f.read().replace('ADDRESS', f'{ipaddr}:{port}')
-        return text, {'Content-Type': 'text/html'}
+        return text, {'Content-Type': 'text/html'} 
      
 @app.get('/area')
 @with_websocket
 async def change_area(request, ws):
+    resistor = Photoresistor(13, red_Led)
+
+    async def send_brightness():
+        while True:
+            try:
+                if ws.closed:
+                    break
+                value = resistor.read()
+                await ws.send(str(value))
+            except Exception as e:
+                print("Brightness send error:", e)
+                break
+            await asyncio.sleep(0.25)  # yield to event loop
+    
+    task = asyncio.create_task(send_brightness())
     try:
         while True:
             data = await ws.receive()
             if data is None:
                 break
-            print(data)
+#             print(data)
             d = json.loads(data)
 
             if d['area'] == 'rgbRoom':
@@ -68,9 +85,16 @@ async def change_area(request, ws):
                         blue_Led.on()
                 except Exception as e:
                     print("Error toggling blue LED:", e)
+                    
+#             await asyncio.sleep(1)                
 
     except Exception as e:
         print("WebSocket disconnected:", e)
-
-
+        
+    finally:
+        task.cancel()    
+        resistor.deinit()
+        
 app.run()
+# reset()
+
