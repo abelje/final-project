@@ -17,17 +17,18 @@
                     if (rgbRoom) {
                         const data = {
                             area: room,
-                            rgb: {
-                                red: rgbRoom.red,
-                                green: rgbRoom.green,
-                                blue: rgbRoom.blue
-                            }
+                            rgb: rgbRoom
                         };
                         ws.send(JSON.stringify(data));
                     }
                     else {
                         const data = {
-                            area: room
+                            area: room,
+                            rgb: {
+                                red: -1,
+                                green: 0,
+                                blue: 0
+                            }
                         };
                         ws.send(JSON.stringify(data));
                     }
@@ -41,9 +42,31 @@
                    
                    const rgbRoom = document.getElementById("rgbRoom");
                    rgbRoom.onclick = () => {
-                        send("rgbRoom");
-                        picker = document.getElementById("colorPicker");
-                        picker.innerHTML = "<input type = 'color' id= 'colorPicker'>";
+                        if (!document.getElementById("rgbPicker")) {
+                            let picker = document.getElementById("colorPicker");
+                            picker.innerHTML = "<input type = 'color' id= 'rgbPicker'>";
+                            rgbPicker = document.getElementById("rgbPicker");
+                            rgbPicker.addEventListener("input", (event) => {
+                                const color = event.target.value;
+                                // convert #RRGGBB to [0, 100]
+                                const red = parseInt(color.substr(1,2), 16) * 100 / 255;
+                                const green = parseInt(color.substr(3,2), 16) * 100 / 255;
+                                const blue = parseInt(color.substr(5,2), 16) * 100 / 255;
+
+                                const rgb = {
+                                    red: red,
+                                    green: green,
+                                    blue: blue
+                                }
+
+                                send("rgbRoom", rgb)
+                            })
+                        }
+                        else {
+                            // disable rgb picker element
+                            let picker = document.getElementById("colorPicker");
+                            picker.innerHTML = "<div id='colorPicker'>"
+                        }
                    };
                 }
 
@@ -73,7 +96,7 @@
             <area id="blueRoom" shape="rect" coords="608,76,875,397">
             <area id="rgbRoom" shape="rect" coords="136,592,875,933">
         </map>
-        <div id="colorPicker">
+        <div id="colorPicker"></div>
         
     </body>
 </html>

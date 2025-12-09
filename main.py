@@ -17,7 +17,7 @@ port = 5000
 # leds
 red_Led = Led(25)
 blue_Led = Led(32)
-rgb_Led = RGBLed(18, 19, 32)
+rgb_Led = RGBLed(18, 19, 22)
 
 app = Microdot()
 
@@ -40,9 +40,13 @@ async def change_area(request, ws):
             d = json.loads(data)
 
             if d['area'] == 'rgbRoom':
-                red = max(0, min(1, d['red'] / 100))
-                green = max(0, min(1, d['green'] / 100))
-                blue = max(0, min(1, d['blue'] / 100))
+                if d['rgb']["red"] == -1:
+                    rgb_Led.off()
+                    d['rgb']["red"] = 0
+                    
+                red = max(0, min(1, d['rgb']['red'] / 100))
+                green = max(0, min(1, d['rgb']['green'] / 100))
+                blue = max(0, min(1, d['rgb']['blue'] / 100))
                 rgb_Led.set_color(red, green, blue)
 
             elif d['area'] == 'redRoom':
