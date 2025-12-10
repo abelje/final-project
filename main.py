@@ -17,6 +17,9 @@ red_Led = Led(25)
 blue_Led = Led(32)
 rgb_Led = RGBLed(18, 19, 22)
 current_room = 0
+adc = ADC(Pin(33))
+adc.atten(ADC.ATTN_11DB)
+adc.width(ADC.WIDTH_10BIT)
 
 app = Microdot()
 
@@ -29,14 +32,15 @@ async def index(request):
 
 @app.get('/area')
 @with_websocket
-async def change_area(request, ws):    
+async def change_area(request, ws):
+    global adc
     def change_room(a):
         global current_room
         current_room += 1
         current_room %= 3
         data = {
             "room": current_room,
-            "bright": current_room
+            "bright": str(adc.read())
         }
         asyncio.run(ws.send(json.dumps(data)))
         
@@ -78,4 +82,3 @@ async def change_area(request, ws):
                 print("Error toggling blue LED:", e)
                                            
 app.run()
-
