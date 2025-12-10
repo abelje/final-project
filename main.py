@@ -16,12 +16,32 @@ port = 5000
 red_Led = Led(25)
 blue_Led = Led(32)
 rgb_Led = RGBLed(18, 19, 22)
+
 current_room = 0
+rooms = ["Red Room", "Blue Room", "RGB Room"]
+leds = [red_Led, blue_Led, rgb_Led]
+rgblight = False
+
+def toggle_light(click):
+    global rgblight
+    global leds
+
+    if current_room < 2:
+        if leds[current_room].get_brightness > 0:
+            leds[current_room].off()
+    elif current_room == 3:
+        if rgblight:
+            rgblight = False
+            leds[current_room].off()
+    else:
+        rgblight = True
+        leds[current_room].on()
+
+button = DebouncedSwitch(23, toggle_light)
+
 adc = ADC(Pin(33))
 adc.atten(ADC.ATTN_11DB)
 adc.width(ADC.WIDTH_10BIT)
-
-rooms = ["Red Room", "Blue Room", "RGB Room"]
 
 app = Microdot()
 

@@ -15,6 +15,7 @@
                 function send(room, rgbRoom) {
                     console.log("Room: ", room);
                     const place = document.getElementById("place");
+                    place.innerText = room;
                     if (rgbRoom) {
                         const data = {
                             area: room,
