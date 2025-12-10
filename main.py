@@ -21,6 +21,8 @@ adc = ADC(Pin(33))
 adc.atten(ADC.ATTN_11DB)
 adc.width(ADC.WIDTH_10BIT)
 
+rooms = ["Red Room", "Blue Room", "RGB Room"]
+
 app = Microdot()
 
 @app.get('/')
@@ -39,7 +41,7 @@ async def change_area(request, ws):
         current_room += 1
         current_room %= 3
         data = {
-            "room": current_room,
+            "room": rooms[current_room],
             "bright": str(adc.read())
         }
         asyncio.run(ws.send(json.dumps(data)))
