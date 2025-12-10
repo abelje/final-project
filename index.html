@@ -73,6 +73,13 @@
                 // receiving data from esp32: update slider bar and percentage
                 ws.onmessage = (event) => {
                     console.log(event.data);
+                    const data = JSON.parse(event.data);
+
+                    const brightness = document.getElementById("brightness");
+                    brightness.innerText = `Brightness: ${data.bright}`;
+
+                    const place = document.getElementById("place");
+                    place.innerText = data.room;
                 };
 
 
@@ -86,7 +93,7 @@
         </script>
     </head>
     <body>
-        <h1>Home</h1>
+        <h1 id="place">Home</h1>
         <h2 id="brightness">Brightness: #</h2>
         <img src="https://raw.githubusercontent.com/abelje/final-project/refs/heads/main/home.png" alt="Workplace" usemap="#workmap" width="1024" height="1024">
         <map name="workmap">

@@ -2,7 +2,6 @@ from led import Led, RGBLed
 from microdot import Microdot
 from wifi import Wifi
 from machine import Pin, ADC, reset, Timer
-from time import sleep_ms
 from photoresistor import Photoresistor
 import json
 from websocket import with_websocket
@@ -17,10 +16,7 @@ port = 5000
 red_Led = Led(25)
 blue_Led = Led(32)
 rgb_Led = RGBLed(18, 19, 22)
-
-adc = ADC(Pin(15))
-adc.atten(ADC.ATTN_11DB)
-adc.width(ADC.WIDTH_10BIT)
+current_room = 0
 
 app = Microdot()
 
@@ -33,17 +29,21 @@ async def index(request):
 
 @app.get('/area')
 @with_websocket
-async def change_area(request, ws):
-    def send(a):
-        print("sent")
-        asyncio.run(ws.send(str(1)))
+async def change_area(request, ws):    
+    def change_room(a):
+        global current_room
+        current_room += 1
+        current_room %= 3
+        data = {
+            "room": current_room,
+            "bright": current_room
+        }
+        asyncio.run(ws.send(json.dumps(data)))
+        
+    rotary = RotaryEncoder(14, 13, change_room)
 
-    button = DebouncedSwitch(23, send)
     while True:
         data = await ws.receive()
-        if data is None:
-            break
-#             print(data)
         d = json.loads(data)
 
         if d['area'] == 'rgbRoom':
@@ -76,6 +76,6 @@ async def change_area(request, ws):
                     blue_Led.on()
             except Exception as e:
                 print("Error toggling blue LED:", e)
-                                     
-        
+                                           
 app.run()
+
