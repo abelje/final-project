@@ -72,8 +72,6 @@
 
                 // receiving data from esp32: update slider bar and percentage
                 ws.onmessage = (event) => {
-                    brightness = document.getElementById("brightness");
-                    brightness.textContent = `Brightness: ${event.data}`
                     console.log(event.data);
                 };
 
